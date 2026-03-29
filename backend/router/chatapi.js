@@ -4,7 +4,22 @@ import multer from "multer";
 
 const router = Router()
 
-const upload = multer({ storage: multer.memoryStorage() });
-router.post("/",upload.single("file"), chat)
+// here we are using memory storage 
+// const upload = multer({ storage: multer.memoryStorage() });
+// router.post("/",upload.single("file"), chat)
+
+// now we are using diskstorage 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // folder
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+router.post("/", upload.single("file"), chat);
 
 export default router
