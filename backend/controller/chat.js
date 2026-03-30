@@ -16,19 +16,33 @@ const pinecone_api_key = process.env.PINECONE_API_KEY
 const pinecone_index = process.env.PINECONE_INDEX
 
 const chat = async(req , res , next) => {
-    const filePath = req.file.path;
-    console.log("filepath>>>>>>>>>>",filePath);
+    // const filePath = req.file.path;
+    // console.log("filepath>>>>>>>>>>",filePath);
     console.log("body>>>>>>>>>>>" , req.body)
+    const files = req.files
+    console.dir(files)
+    const filePath = files.map(item => item.path)
+    console.log("filePath>>>>>>>>>" , filePath)
     const query = req.body.query
     console.log(query)
-    const loader = new PDFLoader(filePath);
-    const docs = await loader.load();
-    console.log("docsData>>>>>>>>>>>>" , docs)
+    const docsData = (
+    await Promise.all(
+      filePath.map(async (item) => {
+        const loader = new PDFLoader(item);
+        return await loader.load();
+      })
+    )
+    ).flat();
+
+    console.log("docsData>>>>>>>>>>>>>" , docsData);
+    // const loader = new PDFLoader(filePath);
+    // const docs = await loader.load();
+    // console.log("docsData>>>>>>>>>>>>" , docs)
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
     });
-    const splitDocs = await splitter.splitDocuments(docs);
+    const splitDocs = await splitter.splitDocuments(docsData);
     console.log("chunk>>>>>>>>>>>>>>>>" , splitDocs)
     // const models = await ai.models.list();
     // console.log(models);
