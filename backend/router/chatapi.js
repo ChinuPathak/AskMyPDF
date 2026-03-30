@@ -20,6 +20,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/", upload.single("file"), chat);
+// router.post("/", upload.single("file"), chat);
+router.post("/" , upload.array("files" , 5) , chat)
 
 export default router
