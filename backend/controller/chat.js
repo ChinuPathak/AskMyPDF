@@ -48,13 +48,18 @@ const chat = async (req, res, next) => {
     .map(item => item.pageContent)
     .join("\n\n");
   const prompt = chattingPrompt(query, formattedData)
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+  const result = await ai.models.generateContentStream({
+    model: "gemini-2.5-flash",
     contents: prompt,
   });
-  console.log("Response>>>>>>>>>>>>>>>>", response.text)
-  res.json({
-    answer: response.text
-  })
+
+  for await (const chunk of result) {
+    const text = chunk.text;
+    console.log("text>>>>>>>>>>>>>" ,text)
+    if (text) {
+      res.write(text);
+    }
+  }
+  res.end();
 }
 export default chat
